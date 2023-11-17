@@ -1,0 +1,107 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyPckxNBY3AAbP9AMNqPtWgv",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/NiyatiBhasin/REINFORCE/blob/main/experiment%209\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "S_zQi_gx3upN",
+        "outputId": "d7c843ad-cacc-461f-a1b5-c34dbab8d68c"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Monte Carlo estimated expected value after 100000 games: -0.35065\n"
+          ]
+        }
+      ],
+      "source": [
+        "import random\n",
+        "\n",
+        "def draw_card():\n",
+        "    \"\"\"Return a random card value between 1 and 11.\"\"\"\n",
+        "    return random.randint(1, 11)\n",
+        "\n",
+        "def play_blackjack():\n",
+        "    \"\"\"Simulate one game of Blackjack.\"\"\"\n",
+        "    # Initial cards for the player and dealer\n",
+        "    player_cards = [draw_card(), draw_card()]\n",
+        "    dealer_cards = [draw_card(), draw_card()]\n",
+        "\n",
+        "    # Check for a natural blackjack (21 with two cards)\n",
+        "    if sum(player_cards) == 21:\n",
+        "        return 1  # Player wins with a natural blackjack\n",
+        "\n",
+        "    # Player's turn\n",
+        "    while sum(player_cards) < 21:\n",
+        "        # Draw a card with a certain probability\n",
+        "        if random.random() < 0.5:\n",
+        "            player_cards.append(draw_card())\n",
+        "        else:\n",
+        "            break\n",
+        "\n",
+        "    # Dealer's turn\n",
+        "    while sum(dealer_cards) < 17:\n",
+        "        dealer_cards.append(draw_card())\n",
+        "\n",
+        "    # Determine the winner\n",
+        "    if sum(player_cards) > 21:\n",
+        "        return -1  # Player busts, dealer wins\n",
+        "    elif sum(dealer_cards) > 21:\n",
+        "        return 1   # Dealer busts, player wins\n",
+        "    elif sum(player_cards) > sum(dealer_cards):\n",
+        "        return 1   # Player has a higher total, player wins\n",
+        "    elif sum(player_cards) < sum(dealer_cards):\n",
+        "        return -1  # Dealer has a higher total, dealer wins\n",
+        "    else:\n",
+        "        return 0   # It's a tie\n",
+        "\n",
+        "def monte_carlo_simulation(num_games):\n",
+        "    \"\"\"Run a Monte Carlo simulation to estimate the expected value.\"\"\"\n",
+        "    total_wins = 0\n",
+        "\n",
+        "    for _ in range(num_games):\n",
+        "        result = play_blackjack()\n",
+        "        total_wins += result\n",
+        "\n",
+        "    expected_value = total_wins / num_games\n",
+        "    return expected_value\n",
+        "\n",
+        "if __name__ == \"__main__\":\n",
+        "    num_games = 100000\n",
+        "    result = monte_carlo_simulation(num_games)\n",
+        "    print(f\"Monte Carlo estimated expected value after {num_games} games: {result}\")\n"
+      ]
+    }
+  ]
+}
