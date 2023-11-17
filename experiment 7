@@ -1,0 +1,134 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyOwdTPSxpFtENCgWyPUh0ZR",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/NiyatiBhasin/REINFORCE/blob/main/experiment%207\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "1Dgu7lZ7ym09",
+        "outputId": "ecaceece-9ea8-4d35-c707-8d649a0d196c"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Policy iteration converged in 2 iterations.\n",
+            "Optimal Policy: [0 0]\n",
+            "Optimal Value Function: [3.26026695 2.98629484]\n"
+          ]
+        }
+      ],
+      "source": [
+        "import numpy as np\n",
+        "\n",
+        "def policy_evaluation(policy, transition_probs, rewards, gamma=0.9, epsilon=1e-6):\n",
+        "    num_states = len(transition_probs)\n",
+        "    num_actions = len(transition_probs[0])\n",
+        "\n",
+        "    # Initialize the value function arbitrarily\n",
+        "    V = np.zeros(num_states)\n",
+        "\n",
+        "    while True:\n",
+        "        delta = 0\n",
+        "\n",
+        "        for s in range(num_states):\n",
+        "            v = V[s]\n",
+        "            bellman_expectation = sum([transition_probs[s][policy[s]][s1] * (rewards[s][policy[s]][s1] + gamma * V[s1]) for s1 in range(num_states)])\n",
+        "            V[s] = bellman_expectation\n",
+        "            delta = max(delta, abs(v - V[s]))\n",
+        "\n",
+        "        if delta < epsilon:\n",
+        "            break\n",
+        "\n",
+        "    return V\n",
+        "\n",
+        "def policy_improvement(transition_probs, rewards, V, gamma=0.9):\n",
+        "    num_states = len(transition_probs)\n",
+        "    num_actions = len(transition_probs[0])\n",
+        "\n",
+        "    new_policy = np.zeros(num_states, dtype=int)\n",
+        "\n",
+        "    for s in range(num_states):\n",
+        "        q_values = [sum([transition_probs[s][a][s1] * (rewards[s][a][s1] + gamma * V[s1]) for s1 in range(num_states)]) for a in range(num_actions)]\n",
+        "        new_policy[s] = np.argmax(q_values)\n",
+        "\n",
+        "    return new_policy\n",
+        "\n",
+        "def policy_iteration(transition_probs, rewards, gamma=0.9, max_iterations=1000):\n",
+        "    num_states = len(transition_probs)\n",
+        "    num_actions = len(transition_probs[0])\n",
+        "\n",
+        "    # Initialize a random policy\n",
+        "    policy = np.random.choice(num_actions, num_states)\n",
+        "\n",
+        "    for i in range(max_iterations):\n",
+        "        # Policy Evaluation\n",
+        "        V = policy_evaluation(policy, transition_probs, rewards, gamma)\n",
+        "\n",
+        "        # Policy Improvement\n",
+        "        new_policy = policy_improvement(transition_probs, rewards, V, gamma)\n",
+        "\n",
+        "        # Check for convergence\n",
+        "        if np.array_equal(policy, new_policy):\n",
+        "            print(\"Policy iteration converged in {} iterations.\".format(i+1))\n",
+        "            break\n",
+        "\n",
+        "        policy = new_policy\n",
+        "\n",
+        "    return policy, V\n",
+        "\n",
+        "# Example usage:\n",
+        "# Define transition probabilities, rewards, and discount factor\n",
+        "transition_probs = np.array([[[0.7, 0.3], [0.2, 0.8]], [[0.4, 0.6], [0.1, 0.9]]])\n",
+        "rewards = np.array([[[1, -1], [2, 0]], [[-1, 1], [0, -2]]])\n",
+        "gamma = 0.9\n",
+        "\n",
+        "# Run policy iteration\n",
+        "optimal_policy, optimal_value = policy_iteration(transition_probs, rewards, gamma)\n",
+        "print(\"Optimal Policy:\", optimal_policy)\n",
+        "print(\"Optimal Value Function:\", optimal_value)\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from google.colab import drive\n",
+        "drive.mount('/content/drive')"
+      ],
+      "metadata": {
+        "id": "u0n72a5d2bKt"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
