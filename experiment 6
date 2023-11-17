@@ -1,0 +1,92 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyP7TysrshboLoWieG9LRw2b",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/NiyatiBhasin/REINFORCE/blob/main/experiment%206\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 2,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "-d0J8cmnAEFj",
+        "outputId": "1568ef76-7a97-44c0-a48a-efabe05ae81c"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Simulation result after 10 steps: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]\n"
+          ]
+        }
+      ],
+      "source": [
+        "import numpy as np\n",
+        "\n",
+        "class MarkovProcess:\n",
+        "    def __init__(self, transition_matrix, initial_state):\n",
+        "\n",
+        "        self.transition_matrix = np.array(transition_matrix)\n",
+        "        self.current_state = initial_state\n",
+        "\n",
+        "    def step(self):\n",
+        "\n",
+        "        transition_probabilities = self.transition_matrix[self.current_state]\n",
+        "        next_state = np.random.choice(len(transition_probabilities), p=transition_probabilities)\n",
+        "        self.current_state = next_state\n",
+        "\n",
+        "    def simulate(self, num_steps):\n",
+        "\n",
+        "        states_visited = [self.current_state]\n",
+        "        for _ in range(num_steps):\n",
+        "            self.step()\n",
+        "            states_visited.append(self.current_state)\n",
+        "        return states_visited\n",
+        "\n",
+        "# Example usage:\n",
+        "if __name__ == \"__main__\":\n",
+        "    # Define a transition matrix for a simple two-state Markov process\n",
+        "    transition_matrix = [\n",
+        "        [0.7, 0.3],  # Transition probabilities from state 0\n",
+        "        [0.4, 0.6]   # Transition probabilities from state 1\n",
+        "    ]\n",
+        "\n",
+        "    initial_state = 0  # Initial state of the process\n",
+        "\n",
+        "    # Create a Markov process\n",
+        "    markov_process = MarkovProcess(transition_matrix, initial_state)\n",
+        "\n",
+        "    # Simulate the process for 10 steps\n",
+        "    num_steps = 10\n",
+        "    simulation_result = markov_process.simulate(num_steps)\n",
+        "\n",
+        "    print(f\"Simulation result after {num_steps} steps: {simulation_result}\")\n"
+      ]
+    }
+  ]
+}
