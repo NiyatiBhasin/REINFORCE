@@ -1,0 +1,215 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyM0dGlbTMfNRlXZ/i9N20qf",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/NiyatiBhasin/REINFORCE/blob/main/Experiment-10\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import gym\n",
+        "import numpy as np\n",
+        "import random\n",
+        ""
+      ],
+      "metadata": {
+        "id": "uF2jjtGn2BFw"
+      },
+      "execution_count": 2,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "env = gym.make('FrozenLake-v1', is_slippery=False)"
+      ],
+      "metadata": {
+        "id": "gguv9lrZ2CaX"
+      },
+      "execution_count": 3,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "action_space_size=env.action_space.n\n",
+        "\n",
+        "\n",
+        "action_space_size"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "9pXpNd6U2CiU",
+        "outputId": "0803ea67-5145-4ef1-ca2c-feba8ba388a7"
+      },
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "4"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 4
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "state_space_size=env.observation_space.n\n",
+        "state_space_size"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "lEewt9Qr2Cp7",
+        "outputId": "5c252bd0-a5ec-429b-f972-2324661cdb94"
+      },
+      "execution_count": 5,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "16"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 5
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "qtable=np.zeros((state_space_size, action_space_size))\n",
+        "qtable"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "qp3eJSon2WAS",
+        "outputId": "6b8e2c1b-062c-4c0e-a95d-506e25ec204f"
+      },
+      "execution_count": 6,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "array([[0., 0., 0., 0.],\n",
+              "       [0., 0., 0., 0.],\n",
+              "       [0., 0., 0., 0.],\n",
+              "       [0., 0., 0., 0.],\n",
+              "       [0., 0., 0., 0.],\n",
+              "       [0., 0., 0., 0.],\n",
+              "       [0., 0., 0., 0.],\n",
+              "       [0., 0., 0., 0.],\n",
+              "       [0., 0., 0., 0.],\n",
+              "       [0., 0., 0., 0.],\n",
+              "       [0., 0., 0., 0.],\n",
+              "       [0., 0., 0., 0.],\n",
+              "       [0., 0., 0., 0.],\n",
+              "       [0., 0., 0., 0.],\n",
+              "       [0., 0., 0., 0.],\n",
+              "       [0., 0., 0., 0.]])"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 6
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#hyperparameters\n",
+        "total_episodes=10000\n",
+        "learning_rate=0.2\n",
+        "max_steps=100\n",
+        "gamma=0.99\n",
+        "\n",
+        "epsilon=1\n",
+        "max_epsilon=1\n",
+        "min_epsilon=.01\n",
+        "decay_rate=0.001\n",
+        "\n",
+        "\n",
+        "rewards=[]\n",
+        "for episode in range(total_episodes):\n",
+        "  state=env.reset()\n",
+        "  step=0\n",
+        "  done=False\n",
+        "  total_rewards=0\n",
+        "\n",
+        "  for step in range(max_steps):\n",
+        "    if random.uniform(0,1)>epsilon:\n",
+        "      action=np.argmax(qtable[state,:]) #exploitation\n",
+        "    else:\n",
+        "      action=env.action_space.sample() # Exploration\n",
+        "\n",
+        "    new_state, reward, done, info =env.step(action)\n",
+        "    max_new_state=np.max(qtable[new_state,:])\n",
+        "    qtable[state,action] = qtable[state,action] + learning_rate*(reward+gamma*max_new_state-qtable[state,action])\n",
+        "\n",
+        "    total_rewards+= reward\n",
+        "    state= new_state\n",
+        "\n",
+        "    if done:\n",
+        "      break\n",
+        "\n",
+        "  epsilon = min_epsilon + (max_epsilon - min_epsilon)*np.exp(-decay_rate*episode)\n",
+        "  rewards.append(total_rewards)\n",
+        "\n",
+        "print (\"Score:\", str(sum(rewards)/total_episodes))\n",
+        "\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "sw69eoDM2WEV",
+        "outputId": "b0f751d4-8906-472d-a897-0f0eb8c401fd"
+      },
+      "execution_count": 7,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Score: 0.8829\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
